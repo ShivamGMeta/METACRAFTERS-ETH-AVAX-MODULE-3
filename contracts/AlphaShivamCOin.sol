@@ -1,73 +1,67 @@
 /*
-Write a smart contract to create your own token on a local HardHat network. Once you have your contract, you should be able to use remix to interact with it. From remix, 
-the contract owner should be ale to mint tokens to a provided address. Any user should be able to burn and transfer tokens.
+Write a smart contract to create your own token on a local HardHat network. Once you have your contract,
+ you should be able to use remix to interact with it. From remix, 
+the contract owner should be ale to mint tokens to a provided address. 
+Any user should be able to burn and transfer tokens.
+
+OpenZeppelin is a library of reusable, secure, and community-vetted smart contracts. It provides 
+implementations of various token standards, including ERC20, as well as other components like access control
 */
 
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-// import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-// import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Burnable.sol";
-// import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+// ERC20 is a widely-used standard for creating and managing fungible tokens on the Ethereum blockchain
 
+contract shivamTokenCompany is ERC20, Ownable {
+    // Token details
+    string private constant _name = "AlphaCoin";
+    string private constant _symbol = "ASG";
 
-contract MyToken {
-    string public name;
-    string public symbol;
-    uint256 public totalSupply;
-    mapping(address => uint256) public balances;
+    uint256 private _totalSupply = 0;
 
-    address public owner;
-
-    
-
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only contract owner can call this function");
-        _;
+    constructor(uint256 initialSupply) ERC20(_name, _symbol) Ownable(msg.sender) {
+        // Mint initial supply to the contract deployer (owner)
+        uint256 initialSupplyWithDecimals = initialSupply;
+        _mint(msg.sender, initialSupplyWithDecimals);
+        _totalSupply = initialSupplyWithDecimals;
     }
 
-    constructor() {
-        name = "AlphaCoin";
-        symbol = "ASG";
-        owner = msg.sender;
-        // mint(msg.sender, 10000 * 10 ** decimals());
+    // Override decimals function to specify the number of decimal places
+    function decimals() public view virtual override returns (uint8) {
+        return 2;
     }
 
-    function mint(address to, uint256 amount) external onlyOwner {
-        require(to != address(0), "Invalid address");
-        totalSupply += amount;
-        balances[to] += amount;
-        
+    // Function to mint new tokens, only the owner can call this
+    function mintTokens(address to, uint256 amount) external onlyOwner {
+        uint256 amountWithDecimals = amount;
+        _mint(to, amountWithDecimals);
+        _totalSupply += amountWithDecimals;
     }
 
-    function burn(uint256 amount) external {
-        require(amount > 0, "Invalid amount");
-        require(balances[msg.sender] >= amount, "Insufficient balance");
-        totalSupply -= amount;
-        balances[msg.sender] -= amount;
-        
+    // Function to burn tokens from the caller's account
+    function burnTokens(uint256 amount) external {
+        uint256 amountWithDecimals = amount;
+        _burn(msg.sender, amountWithDecimals);
+        _totalSupply -= amountWithDecimals;
     }
 
-    function transferFrom(address from, address to, uint256 amount) external {
-        //transfer tokens on behalf of another address
-        require(to != address(0), "Invalid address");
-        require(amount > 0, "Invalid amount");
-        require(balances[msg.sender] >= amount, "Insufficient balance");
-        balances[from] -= amount;
-        balances[to] += amount;
-        // _transfer(from, to, amount);
-        // _approve(from, _msgSender(), allowance(from, _msgSender()) - amount);
-        // return true;
+    // Function to check the token balance of the caller
+    function myBalance() external view returns (uint256) {
+        return balanceOf(msg.sender);
     }
 
-    function transfer(address to, uint256 amount) external {
-        //Allows a user to transfer tokens to another address.
-        require(to != address(0), "Invalid address");
-        require(amount > 0, "Invalid amount");
-        require(balances[msg.sender] >= amount, "Insufficient balance");
-        balances[msg.sender] -= amount;
-        balances[to] += amount;
-        
+    // Function to transfer tokens to another address
+    function transferTokens(address to, uint256 amount) external {
+        uint256 amountWithDecimals = amount;
+        _transfer(msg.sender, to, amountWithDecimals);
+    }
+
+    // Function to get the total supply of tokens
+    function totalSupply() public view virtual override returns (uint256) {
+        return _totalSupply;
     }
 }
