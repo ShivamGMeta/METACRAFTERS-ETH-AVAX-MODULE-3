@@ -15,11 +15,17 @@ This README file provides an overview of the ERC-20 token contract that includes
 
 # Implementation
 1. Clone this repository
-2. use git bash
+2. Open a Bash Terminal
+```sh
+npm i
+
+npm install @openzeppelin/contracts
+
+```
+
+3. use git bash
 run following commands 
 ```sh
-npm install
-
 npm install -g @remix-project/remixd
 
 remixd -s ./ --remix-ide https://remix.ethereum.org
